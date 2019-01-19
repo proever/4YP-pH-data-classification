@@ -71,4 +71,23 @@ def get_data_and_labels():
 
         all_raw_data.append(ch0.values)
 
-    return (all_raw_data, all_labels)
+    all_raw_data_in_windows = np.zeros((393890, 150))
+    all_labels_for_windows = np.zeros((393890, 1))
+
+    window_duration = 30
+    samples_per_window = window_duration * sampling_rate
+
+    for exp_number, raw_data in enumerate(all_raw_data):
+        num_rolling_windows = len(raw_data) - samples_per_window
+
+        current_labels = all_labels[exp_number]
+
+        for i in range(num_rolling_windows):
+            rolling_window = raw_data[i:i+samples_per_window]
+            rolling_window_label = int(
+                1 in current_labels[i:i+samples_per_window])
+
+            all_raw_data_in_windows[i] = rolling_window
+            all_labels_for_windows[i][0] = rolling_window_label
+
+    return (all_raw_data_in_windows, all_labels_for_windows)
