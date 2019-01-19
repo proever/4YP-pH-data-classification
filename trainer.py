@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers
 from sklearn.model_selection import train_test_split
@@ -6,8 +7,7 @@ import data_labeling
 
 data, labels = data_labeling.get_data_and_labels()
 
-data = data.reshape((393890, 150, 1))
-print(data.shape)
+data = np.expand_dims(data, axis=-1)
 
 model = tf.keras.Sequential()
 
