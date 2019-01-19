@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime
 
+
 def get_data_and_labels():
     data_dir = './raw_data/'
 
@@ -10,8 +11,6 @@ def get_data_and_labels():
     exp_info = pd.read_excel(data_dir + exp_log_fn)
 
     info_columns = list(exp_info)
-
-    num_exps = len(exp_info[info_columns[0]])
 
     all_raw_data = []
     all_labels = []
@@ -31,7 +30,7 @@ def get_data_and_labels():
 
         exp_data_fn = data_dir + exp_id + '.txt'
 
-        exp_data = pd.read_csv(exp_data_fn , delimiter='\t')
+        exp_data = pd.read_csv(exp_data_fn, delimiter='\t')
 
         columns = list(exp_data)
 
@@ -54,10 +53,15 @@ def get_data_and_labels():
             start = datetime.datetime.strptime(start, '%H:%M:%S') - zero_time
             stop = datetime.datetime.strptime(stop, '%H:%M:%S') - zero_time
 
-            duration = stop - start
+            start_index = np.where(
+                exp_data[columns[0]] == start.total_seconds())[0][0]
+            stop_index = np.where(
+                exp_data[columns[0]] == stop.total_seconds())[0][0]
 
-            start_index = np.where(exp_data[columns[0]] == start.total_seconds())[0][0] + offset*sampling_rate
-            stop_index = np.where(exp_data[columns[0]] == stop.total_seconds())[0][0] + offset*sampling_rate
+            os = offset*sampling_rate
+
+            start_index += os
+            stop_index += os
 
             labels[0][start_index:stop_index] = 1
 
@@ -65,7 +69,6 @@ def get_data_and_labels():
 
         ch0 = exp_data[columns[1]]
 
-        # all_raw_data.append(np.vstack((ch0, ch1)))
         all_raw_data.append(ch0.values)
 
     return (all_raw_data, all_labels)
