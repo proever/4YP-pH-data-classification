@@ -80,27 +80,28 @@ zero_time = datetime.datetime.strptime('00:00:00', '%H:%M:%S')
 labels = np.zeros(int(max_index))
 
 for i, start in enumerate(dose_starts):
-    stop = dose_stops[i]
+    if i != 0:
+        stop = dose_stops[i]
 
-    start = datetime.datetime.strptime(start, '%H:%M:%S') - zero_time
-    stop = datetime.datetime.strptime(stop, '%H:%M:%S') - zero_time
+        start = datetime.datetime.strptime(start, '%H:%M:%S') - zero_time
+        stop = datetime.datetime.strptime(stop, '%H:%M:%S') - zero_time
 
-    start_index = data_utils.find_nearest(exp_data[time_code], stop.total_seconds())
+        start_index = data_utils.find_nearest(exp_data[time_code], stop.total_seconds())
 
-    # start_index = np.where(
-    #     exp_data[time_code] == start.total_seconds())[0][0]
+        # start_index = np.where(
+        #     exp_data[time_code] == start.total_seconds())[0][0]
 
-    if response_duration != -1:
-        stop_index = start_index + (response_duration * sampling_rate)
+        if response_duration != -1:
+            stop_index = start_index + (response_duration * sampling_rate)
 
-    else:
-        stop_index = data_utils.find_nearest(exp_data[time_code], stop.total_seconds())
-        # stop_index = np.where(
-        #     exp_data[time_code] == stop.total_seconds())[0][0]
+        else:
+            stop_index = data_utils.find_nearest(exp_data[time_code], stop.total_seconds())
+            # stop_index = np.where(
+            #     exp_data[time_code] == stop.total_seconds())[0][0]
 
-    off = offset * sampling_rate
+        off = offset * sampling_rate
 
-    labels[start_index + off:stop_index + off] = 1
+        labels[start_index + off:stop_index + off] = 1
 
 output['data'] = data
 output['labels'] = labels.tolist()

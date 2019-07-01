@@ -5,60 +5,52 @@ import pandas as pd
 import math
 import numpy as np
 
+import data_utils
+
 
 def get_data_and_labels(path_to_experiment, window_length, data_steps):
 
-    print('reading', path_to_experiment)
-    exp_data = pd.read_excel(io=path_to_experiment, sheet_name='Sheet1')
+    # print('reading', path_to_experiment)
+    # exp_data = pd.read_excel(io=path_to_experiment, sheet_name='Sheet1')
+    exp_data = np.genfromtxt(path_to_experiment, delimiter=',', names=True)
 
     max_index = len(exp_data['data'])
 
     num_windows = math.floor((max_index - window_length ) / data_steps)
+
+    # from https://stackoverflow.com/a/42258242
     indexer = np.arange(window_length)[None, :] + data_steps*np.arange(num_windows)[:, None]
 
-    print('num samples', max_index)
-    print('num_windows', num_windows)
+    # print('num samples', max_index)
+    # print('num_windows', num_windows)
 
-    windowed_data = exp_data['data'].values[indexer]
-    windowed_labels = exp_data['labels'].values[indexer]
+    windowed_data = exp_data['data'][indexer]
+    windowed_labels = exp_data['labels'][indexer]
 
-    windowed_data = (2 * (windowed_data - np.amin(windowed_data, axis=1)[:, np.newaxis]) / (np.amax(windowed_data, axis=1)[:, np.newaxis] - np.amin(windowed_data, axis=1)[:, np.newaxis])) - 1
+    # windowed_data = (2 * (windowed_data - np.amin(windowed_data, axis=1)[:, np.newaxis]) / (np.amax(windowed_data, axis=1)[:, np.newaxis] - np.amin(windowed_data, axis=1)[:, np.newaxis])) - 1
     windowed_labels = np.amax(windowed_labels, axis=1)
 
     return (windowed_data, windowed_labels)
 
 
-def get_all_data_and_labels(window_size, step_size, path_to_experiments):
+def get_all_data_and_labels(path_to_experiments, window_duration, window_every):
     
     sampling_rate = 5 # Hz
 
-    window_length = window_size * sampling_rate
-    data_steps = step_size * sampling_rate
+    window_length = window_duration * sampling_rate
+    data_steps = window_every * sampling_rate
 
     windows = []
     labels = []
 
-    windows_fn = os.path.join(path_to_experiments, 'all_windows.npy')
-    labels_fn = os.path.join(path_to_experiments, 'all_labels.npy')
+    for f in glob.glob(path_to_experiments + '*.csv'):
+        windowed_data, windowed_labels = get_data_and_labels(f, window_length, data_steps)
+        
+        windows.append(windowed_data)
+        labels.append(windowed_labels)
 
-    if os.path.isfile(windows_fn) and os.path.isfile(labels_fn):
-        print('reading', windows_fn)
-
-        windows = np.load(windows_fn)
-        labels = np.load(labels_fn)
-
-    else:
-        for f in glob.glob(path_to_experiments + '*.xlsx'):
-            windowed_data, windowed_labels = get_data_and_labels(f, window_length, data_steps)
-            
-            windows.append(windowed_data)
-            labels.append(windowed_labels)
-
-        windows = np.vstack(windows)
-        labels = np.concatenate(labels)
-
-        np.save(windows_fn, windows)
-        np.save(labels_fn, labels)
+    windows = np.vstack(windows)
+    labels = np.concatenate(labels)
 
     return(windows, labels)
 

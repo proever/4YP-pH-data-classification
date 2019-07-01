@@ -65,6 +65,13 @@ exp_duration = max(exp_data['Time / s'])
 max_index = find_nearest(time, exp_duration)
 
 zero_time = datetime.datetime.strptime('00:00:00', '%H:%M:%S')
+plt.plot(time[:max_index], exp_data['[chan  0]'][:max_index])
+plt.plot(time[:max_index], data[:max_index])
+plt.title("Experiment ID: " + exp_id)
+plt.legend(['original data', 'LDR data'])
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
+plt.figure()
 
 data_scaled = (data[:max_index] - min(data[:max_index])) / (max(data[:max_index]) - min(data[:max_index]))
 exp_data['LDR_scaled'] = data_scaled
@@ -99,10 +106,13 @@ for i, start in enumerate(dose_starts):
     time_snippet = exp_data.loc[(exp_data.index > start_index + offset*sampling_rate) & (exp_data.index < stop_index + offset*sampling_rate), time_code]
     data_snippet = exp_data.loc[(exp_data.index > start_index + offset*sampling_rate) & (exp_data.index < stop_index + offset*sampling_rate), 'LDR_scaled']
 
-    plt.plot(time_snippet, data_snippet, color='r')
+    plt.plot(time_snippet, data_snippet, color='C2')
     # exp_data.loc[(exp_data.index > start_index + offset*sampling_rate) & (exp_data.index < stop_index + offset*sampling_rate), 'LDR'].plot(x=time_code, y='LDR', color='r', ax=ax)
 
 os = offset * sampling_rate
 
-plt.title(exp_id)
+plt.title("Experiment ID: " + exp_id)
+plt.legend(['LDR data', 'outliers removed', 'labelled data'])
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (scaled, unitless)')
 plt.show()
