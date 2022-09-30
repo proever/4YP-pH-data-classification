@@ -21,7 +21,7 @@ ipython==7.5.0
 ipython-genutils==0.2.0
 jdcal==1.4.1
 jedi==0.13.3
-joblib==0.13.2
+joblib==1.2.0
 json-tricks==3.13.1
 Keras==2.2.4
 Keras-Applications==1.0.7
